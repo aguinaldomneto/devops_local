@@ -12,10 +12,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Build Docker
-        run: docker build -t devops-app:latest .
+      - name: Gerar versão
+        id: version
+        run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      - name: Atualizar Kubernetes
+      - name: Build Docker
+        run: docker build -t devops-app:${{ steps.version.outputs.VERSION }} .
+
+      - name: Atualizar Deployment
         run: |
-          kubectl apply -f k8s/
-          kubectl rollout restart deployment devops-app
+          kubectl set image deployment/devops-app \
+          app=devops-app:${{ steps.version.outputs.VERSION }}
