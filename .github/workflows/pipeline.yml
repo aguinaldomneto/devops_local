@@ -1,3 +1,9 @@
+name: CI/CD Local
+
+on:
+  push:
+    branches: [ "main" ]
+
 jobs:
   deploy-frontend:
     runs-on: self-hosted
