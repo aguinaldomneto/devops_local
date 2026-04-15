@@ -1,25 +1,24 @@
-name: CI/CD Local
-
-on:
-  push:
-    branches: [ "main" ]
-
 jobs:
-  deploy:
+  deploy-frontend:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Gerar versão
-        id: version
-        run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
+      - run: docker build -t frontend:${{ github.run_number }} ./frontend
 
-      - name: Build Docker
-        run: docker build -t devops-app:${{ steps.version.outputs.VERSION }} .
+      - run: |
+          kubectl set image deployment/frontend \
+          app=frontend:${{ github.run_number }}
 
-      - name: Atualizar Deployment
-        run: |
-          kubectl set image deployment/devops-app \
-          app=devops-app:${{ steps.version.outputs.VERSION }}
+  deploy-api:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: docker build -t api:${{ github.run_number }} ./api
+
+      - run: |
+          kubectl set image deployment/api \
+          app=api:${{ github.run_number }}
