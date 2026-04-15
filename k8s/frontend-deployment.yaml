@@ -2,25 +2,25 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: devops-app
+  name: frontend
 
 spec:
   replicas: 2
 
   selector:
     matchLabels:
-      app: devops
+      app: frontend
 
   template:
     metadata:
       labels:
-        app: devops
+        app: frontend
 
     spec:
       containers:
         - name: app
-          image: aguinaldomneto/devops-app:latest
-          imagePullPolicy: Always
+          image: frontend:latest
+          imagePullPolicy: Never
 
           ports:
             - containerPort: 80

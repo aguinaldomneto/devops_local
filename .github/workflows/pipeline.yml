@@ -2,29 +2,30 @@ name: CI/CD Local
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  deploy-frontend:
+  deploy:
     runs-on: self-hosted
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - run: docker build -t frontend:${{ github.run_number }} ./frontend
+      - name: Usar Docker do Minikube
+        run: eval $(minikube docker-env)
 
-      - run: |
-          kubectl set image deployment/frontend \
-          app=frontend:${{ github.run_number }}
+      - name: Build frontend
+        run: docker build -t frontend:latest ./frontend
 
-  deploy-api:
-    runs-on: self-hosted
+      - name: Build api
+        run: docker build -t api:latest ./api
 
-    steps:
-      - uses: actions/checkout@v3
+      - name: Aplicar Kubernetes
+        run: kubectl apply -f k8s/
 
-      - run: docker build -t api:${{ github.run_number }} ./api
-
-      - run: |
-          kubectl set image deployment/api \
-          app=api:${{ github.run_number }}
+      - name: Restart deployments
+        run: |
+          kubectl rollout restart deployment frontend
+          kubectl rollout restart deployment api
